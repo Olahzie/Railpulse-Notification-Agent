@@ -1,0 +1,80 @@
+from ...streaming import build_rail_events_stream, get_param, get_secret
+from pyspark.sql import SparkSession
+spark = SparkSession.builder.getOrCreate()
+
+
+
+def main():
+    kafka_topic = get_param("KAFKA_TOPIC", "train-movements")  
+    secret_scope = get_param("DATABRICKS_SECRET_SCOPE", "pulse")
+    kafka_bootstrap = get_secret(secret_scope, "CONFLUENT_BOOTSTRAP_SERVER")
+    kafka_api_key = get_secret(secret_scope, "CONFLUENT_API_KEY")
+    kafka_api_secret = get_secret(secret_scope, "CONFLUENT_API_SECRET")
+    kafka_security_protocol = get_param("KAFKA_SECURITY_PROTOCOL", "SASL_SSL")
+    kafka_sasl_mechanism = get_param("KAFKA_SASL_MECHANISM", "PLAIN")
+
+    trigger_interval = get_param("TRIGGER_INTERVAL", "10 seconds")
+    checkpoint_base = get_param("CHECKPOINT_BASE", "/Volumes/bootcamp_students/pulse/checkpoints")
+    catalog = get_param("CATALOG", "bootcamp_students")
+    schema = get_param("SCHEMA", "pulse")
+
+    bronze_table = f"{catalog}.{schema}.rail_bronze"
+    checkpoint = f"{checkpoint_base}/bronze/rail"
+
+    spark.sql(f"""
+    CREATE TABLE IF NOT EXISTS {bronze_table} (
+      event_key STRING,
+      kafka_timestamp TIMESTAMP,
+      raw_json STRING,
+      train_id STRING,
+      actual_timestamp TIMESTAMP,
+      loc_stanox STRING,
+      gbtt_timestamp TIMESTAMP,
+      planned_timestamp TIMESTAMP,
+      planned_event_type STRING,
+      event_type STRING,
+      event_source STRING,
+      correction_ind STRING,
+      offroute_ind STRING,
+      train_service_code STRING,
+      division_code STRING,
+      toc_id STRING,
+      timetable_variation STRING,
+      variation_status STRING,
+      next_report_stanox STRING,
+      next_report_run_time STRING,
+      train_terminated STRING,
+      header MAP<STRING, STRING>,
+      delay_monitoring_point STRING,
+      reporting_stanox STRING,
+      ingest_time TIMESTAMP
+    ) USING DELTA
+    """)
+
+    web_events = build_rail_events_stream(
+        spark=spark,
+        kafka_bootstrap=kafka_bootstrap,
+        kafka_topic=kafka_topic,
+        kafka_api_key=kafka_api_key,
+        kafka_api_secret=kafka_api_secret,
+        kafka_security_protocol=kafka_security_protocol,
+        kafka_sasl_mechanism=kafka_sasl_mechanism,
+        starting_offsets='earliest'
+    )
+    
+    query = (
+        web_events.writeStream
+        .format("delta")
+        .outputMode("append")
+        .option("checkpointLocation", checkpoint)
+        .trigger(availableNow=True)
+        .toTable(bronze_table)
+    )
+
+
+    print("Bronze stream started:", query.id)
+    query.awaitTermination()
+
+
+if __name__ == "__main__":
+    main()

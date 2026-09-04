@@ -1,0 +1,102 @@
+-- Run this first in Databricks SQL (or via spark.sql) to create target objects.
+
+USE CATALOG bootcamp_students;
+-- CREATE SCHEMA IF NOT EXISTS bootcamp_students.pulse;
+CREATE SCHEMA IF NOT EXISTS bootcamp_students.pulse_ai;
+-- CREATE VOLUME bootcamp_students.pulse.checkpoints;
+-- CREATE VOLUME bootcamp_students.pulse.lookup;
+
+-- CREATE TABLE IF NOT EXISTS bootcamp_students.pulse.web_events_bronze (
+--   event_key STRING,
+--   kafka_timestamp TIMESTAMP,
+--   raw_json STRING,
+--   url STRING,
+--   referrer STRING,
+--   user_agent STRING,
+--   headers MAP<STRING, STRING>,
+--   host STRING,
+--   ip STRING,
+--   event_time_raw STRING,
+--   event_time TIMESTAMP,
+--   ingest_time TIMESTAMP
+-- )
+-- USING DELTA;
+
+-- CREATE TABLE IF NOT EXISTS tabular.dataexpert_student.web_events_windowed (
+--   window_start TIMESTAMP,
+--   window_end TIMESTAMP,
+--   host STRING,
+--   event_count BIGINT,
+--   unique_ips BIGINT
+-- )
+-- USING DELTA;
+
+-- CREATE TABLE IF NOT EXISTS tabular.dataexpert_student.web_events_enriched (
+--   event_key STRING,
+--   kafka_timestamp TIMESTAMP,
+--   raw_json STRING,
+--   url STRING,
+--   referrer STRING,
+--   user_agent STRING,
+--   headers MAP<STRING, STRING>,
+--   host STRING,
+--   ip STRING,
+--   event_time_raw STRING,
+--   event_time TIMESTAMP,
+--   ingest_time TIMESTAMP,
+--   country STRING,
+--   region STRING,
+--   city STRING,
+--   latitude STRING,
+--   longitude STRING,
+--   enriched_at TIMESTAMP
+-- )
+-- USING DELTA;
+
+-- -- Optional: pre-create names used by dlt_pipeline.py (DLT can also auto-create these).
+-- CREATE TABLE IF NOT EXISTS tabular.dataexpert_student.web_events_bronze_dlt (
+--   event_key STRING,
+--   kafka_timestamp TIMESTAMP,
+--   raw_json STRING,
+--   url STRING,
+--   referrer STRING,
+--   user_agent STRING,
+--   headers MAP<STRING, STRING>,
+--   host STRING,
+--   ip STRING,
+--   event_time_raw STRING,
+--   event_time TIMESTAMP,
+--   ingest_time TIMESTAMP
+-- )
+-- USING DELTA;
+
+-- CREATE TABLE IF NOT EXISTS tabular.dataexpert_student.web_events_windowed_dlt (
+--   window_start TIMESTAMP,
+--   window_end TIMESTAMP,
+--   host STRING,
+--   event_count BIGINT,
+--   unique_ips BIGINT
+-- )
+-- USING DELTA;
+
+-- CREATE TABLE IF NOT EXISTS tabular.dataexpert_student.web_events_enriched_dlt (
+--   event_key STRING,
+--   kafka_timestamp TIMESTAMP,
+--   raw_json STRING,
+--   url STRING,
+--   referrer STRING,
+--   user_agent STRING,
+--   headers MAP<STRING, STRING>,
+--   host STRING,
+--   ip STRING,
+--   event_time_raw STRING,
+--   event_time TIMESTAMP,
+--   ingest_time TIMESTAMP,
+--   country STRING,
+--   region STRING,
+--   city STRING,
+--   latitude STRING,
+--   longitude STRING,
+--   enriched_at TIMESTAMP
+-- )
+-- USING DELTA;
